@@ -10,14 +10,51 @@ import vendingmachine.store.Drink;
 import money.Money;
 
 public class VendingMachine {
-	static Set<Money> acceptableMoney;
-	static {
-		acceptableMoney = getAcceptableMoneySet();
+	private Map<String, Drink> drinkType = new HashMap<>();
+	private Map<String, Integer> drinkStock = new HashMap<>();
+
+	public Drink getDrink(String name) throws VendingMachineExeption {
+		Integer remainStock = drinkStock.get(name);
+		if (remainStock < 1) {
+			throw new VendingMachineExeption("在庫切れです");
+		}
+		drinkStock.put(name, remainStock - 1);
+		return drinkType.get(name);
 	}
 
-	static Set<Money> notAcceptableMoney;
-	static {
-		notAcceptableMoney = getNotAcceptableMoneySet();
+	public void store(Drink drink) {
+		String name = drink.getName();
+		drinkType.put(name, drink);
+		if (drinkStock.containsKey(name)) {
+			drinkStock.put(name, drinkStock.get(name) + 1);
+		} else {
+			drinkStock.put(name, 1);
+		}
+	}
+
+	public void store(Drink drink, int num) {
+		for (int i = 0; i < num; i++) {
+			store(drink);
+		}
+	}
+
+	public int getStock(String name) {
+		return drinkStock.get(name);
+	}
+
+	/**
+	 * 指定された名前を持つジュースの在庫が1以上であり, 投入金額が指定されたドリンクの価格以上であればtrueを返す
+	 * 
+	 * @param name
+	 * @return 指定されたジュースが購入可能であればtrueを返す
+	 */
+	public boolean canParchase(String name) {
+		if (drinkStock.get(name) > 0) {
+			if (drinkType.get(name).getPrice() <= total) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private int total;
@@ -29,6 +66,16 @@ public class VendingMachine {
 	 */
 	public int getTotal() {
 		return total;
+	}
+
+	static Set<Money> acceptableMoney;
+	static {
+		acceptableMoney = getAcceptableMoneySet();
+	}
+
+	static Set<Money> notAcceptableMoney;
+	static {
+		notAcceptableMoney = getNotAcceptableMoneySet();
 	}
 
 	/**
@@ -79,40 +126,18 @@ public class VendingMachine {
 		return set;
 	}
 
-	private Map<String, Drink> drinkType = new HashMap<>();
-	private Map<String, Integer> drinkStock = new HashMap<>();
-	{
-		Drink coke = new Drink("coke", 120);
-		drinkType.put(coke.getName(), coke);
-		drinkStock.put(coke.getName(), 5);
-	}
-
-	public Drink getDrink(String name) throws VendingMachineExeption {
-		Integer remainStock = drinkStock.get(name);
-		if (remainStock < 1) {
-			throw new VendingMachineExeption("在庫切れです");
+	int saleProceeds;
+	public Drink vending(String name) throws VendingMachineExeption {
+		if(canParchase(name)){
+			Drink drink = getDrink(name);
+			total -= drink.getPrice();
+			saleProceeds += drink.getPrice();
+			return drink;
 		}
-		drinkStock.put(name, remainStock - 1);
-		return drinkType.get(name);
-	}
-
-	public void store(Drink drink) {
-		String name = drink.getName();
-		drinkType.put(name, drink);
-		if (drinkStock.containsKey(name)) {
-			drinkStock.put(name, drinkStock.get(name) + 1);
-		} else {
-			drinkStock.put(name, 1);
-		}
-	}
-	public void store(Drink drink,int num){
-		for(int i = 0;i < num;i++){
-			store(drink);
-		}
-	}
-
-	public int getStock(String name) {
-		return drinkStock.get(name);
+		return null;
 	}
 	
+	public int getSales() {
+		return saleProceeds;
+	}
 }

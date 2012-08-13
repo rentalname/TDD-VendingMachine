@@ -1,9 +1,9 @@
 package vendingmachine.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 import money.Money;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,6 +26,12 @@ public class VendingMachineTest {
 	@Before
 	public void setUp() throws Exception {
 		machine = new VendingMachine();
+		Drink coke = new Drink("coke", 120);
+		machine.store(coke, 5);
+		Drink redbull = new Drink("Red Bull", 200);
+		machine.store(redbull, 4);
+		Drink milktea = new Drink("milk tea", 150);
+		machine.store(milktea, 10);
 	}
 
 	@Test
@@ -87,28 +93,85 @@ public class VendingMachineTest {
 		assertSame(machine.insert(Money.Zero), Money.Zero);
 		assertSame(machine.insert(Money.TenThousand), Money.TenThousand);
 	}
+
 	@Test
-	public void 格納されているジュースの情報を表示() throws VendingMachineExeption{
+	public void 格納されているジュースの情報を表示() throws VendingMachineExeption {
 		Drink drink = machine.getDrink("coke");
 		String drinkName = drink.getName();
 		int drinkPrice = drink.getPrice();
 		assertEquals(drinkName, "coke");
 		assertEquals(drinkPrice, 120);
 	}
+
 	@Test
-	public void ジュースを格納する() throws VendingMachineExeption{
-		machine.store(new Drink("redbull", 200));
-		Drink redBull = machine.getDrink("redbull");
-		assertEquals(redBull.getName(), "redbull");
-		assertEquals(redBull.getPrice(), 200);
+	public void ジュースを格納する() throws VendingMachineExeption {
+		String drinkName = "drinkA";
+		machine.store(new Drink(drinkName, 200));
+		Drink drinkA = machine.getDrink(drinkName);
+		assertEquals(drinkA.getName(), drinkName);
+		assertEquals(drinkA.getPrice(), 200);
 	}
+
 	@Test
-	public void 指定したジュースの在庫量を返す() throws VendingMachineExeption{
+	public void 指定したジュースの在庫量を返す() throws VendingMachineExeption {
 		assertEquals(machine.getStock("coke"), 5);
-		machine.store(new Drink("water",100));
-		assertEquals(machine.getStock("water"),1);
+		machine.store(new Drink("water", 100));
+		assertEquals(machine.getStock("water"), 1);
 		machine.getDrink("coke");
 		assertEquals(machine.getStock("coke"), 4);
 	}
-	
+
+	@Test
+	public void ジュースが購入可能かを判断する() {
+		assertFalse(machine.canParchase("coke"));
+		machine.insert(Money.FiveHundred);
+		assertTrue(machine.canParchase("coke"));
+	}
+
+	@Test
+	public void ジュースの販売を行う() throws VendingMachineExeption {
+		Drink water = new Drink("water", 100);
+		machine.store(water);
+
+		Drink drink = machine.vending("water");
+		assertNull(drink);
+		machine.insert(Money.Hundred);
+		Drink vending = machine.vending("water");
+		assertNotNull(vending);
+		assertEquals(vending.getName(), "water");
+		assertEquals(vending.getPrice(), 100);
+	}
+
+	@Test
+	public void ジュースの売買が行われたとき投入総計額を減らす() throws VendingMachineExeption {
+		ジュースの販売を行う();
+		assertEquals(machine.getTotal(), 0);
+		machine.insert(Money.Thousand);
+		machine.vending("Red Bull");
+		assertEquals(machine.getTotal(), 800);
+	}
+
+	@Test
+	public void 売上金額を取得する() throws VendingMachineExeption {
+		ジュースの販売を行う();
+		assertEquals(machine.getSales(), 100);
+		machine.insert(Money.FiveHundred);
+		machine.vending("coke");
+		assertEquals(machine.getSales(), 220);
+	}
+
+	@Test
+	public void ジュース購入後の払い戻し() throws VendingMachineExeption {
+		machine.insert(Money.Hundred);
+		machine.insert(Money.Hundred);
+		machine.insert(Money.Hundred);
+		machine.vending("milk tea");
+		assertEquals(machine.refund(), 150);
+	}
+
+	@Test
+	public void 払い戻し操作によって投入総計額は0になる() throws VendingMachineExeption {
+		ジュース購入後の払い戻し();
+		assertEquals(machine.getTotal(), 0);
+	}
 }
