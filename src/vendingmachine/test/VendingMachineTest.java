@@ -1,23 +1,15 @@
-/**
- * 
- */
 package vendingmachine.test;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import money.Money;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sun.org.apache.regexp.internal.recompile;
-
 import vendingmachine.VendingMachine;
 
 /**
- * TODOs:•¥‚¢–ß‚µ‘€ì 
- * TODO:•¥‚¢–ß‚µ‘€ìÀs‚ÉŒ»İ‚Ì“Š“ü‘ŒvŠz‚É“™‚µ‚¢‹àŠz‚ª•¥‚¢–ß‚³‚ê‚é
- * TODO:•¥‚¢–ß‚µ‘€ìŒã‚É“Š“ü‘ŒvŠz‚Í0‚É‚È‚é
  * 
  * @author Hi
  * 
@@ -53,13 +45,16 @@ public class VendingMachineTest {
 
 	/**
 	 * {@link Money}‚Å—ñ‹“‚³‚ê‚é‘Sí—Ş‚Ì‰İ•¼‚ğ“Š“ü‚·‚é
+	 * 
 	 * @return “Š“ü‚³‚ê‚½‰İ•¼‚Ì‡Œv‹àŠz
 	 */
 	private int insertAllTypeMoney() {
 		int insertTotalAmount = 0;
-		for(Money m:Money.values()){
-			machine.insert(m);
-			insertTotalAmount += m.getAmount();
+		for (Money m : Money.values()) {
+			Money refund = machine.insert(m);
+			if (refund == Money.Zero) {
+				insertTotalAmount += m.getAmount();
+			}
 		}
 		return insertTotalAmount;
 	}
@@ -71,15 +66,23 @@ public class VendingMachineTest {
 		machine.insert(Money.FiveHundred);
 		assertEquals(machine.getTotal(), 600);
 	}
+
 	@Test
-	public void •¥‚¢–ß‚µ‘€ì(){
+	public void •¥‚¢–ß‚µ‘€ì() {
 		int insertTotal = insertAllTypeMoney();
 		assertEquals(machine.refund(), insertTotal);
 	}
+
 	@Test
-	public void •¥‚¢–ß‚µ‘€ìŒã‚Í“Š“ü‹àŠz‚ª0‚É‚È‚Á‚Ä‚¢‚é(){
+	public void •¥‚¢–ß‚µ‘€ìŒã‚Í“Š“ü‹àŠz‚ª0‚É‚È‚Á‚Ä‚¢‚é() {
 		•¥‚¢–ß‚µ‘€ì();
-		assertEquals(machine.getTotal(),0);
+		assertEquals(machine.getTotal(), 0);
 	}
-	
+
+	@Test
+	public void –³Œø‚È‚¨‹à‚ª“Š“ü‚³‚ê‚½ê‡’Ş‚è‘K‚Æ‚µ‚Ä‹A‚Á‚Ä‚­‚é() {
+		assertSame(machine.insert(Money.One), Money.One);
+		assertSame(machine.insert(Money.Zero), Money.Zero);
+		assertSame(machine.insert(Money.TenThousand), Money.TenThousand);
+	}
 }
