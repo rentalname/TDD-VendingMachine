@@ -8,6 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import vendingmachine.VendingMachine;
+import vendingmachine.VendingMachineExeption;
+import vendingmachine.store.Drink;
 
 /**
  * 
@@ -80,9 +82,33 @@ public class VendingMachineTest {
 	}
 
 	@Test
-	public void 無効なお金が投入された場合釣り銭として帰ってくる() {
+	public void 無効なお金が投入された場合釣り銭として返ってくる() {
 		assertSame(machine.insert(Money.One), Money.One);
 		assertSame(machine.insert(Money.Zero), Money.Zero);
 		assertSame(machine.insert(Money.TenThousand), Money.TenThousand);
 	}
+	@Test
+	public void 格納されているジュースの情報を表示() throws VendingMachineExeption{
+		Drink drink = machine.getDrink("coke");
+		String drinkName = drink.getName();
+		int drinkPrice = drink.getPrice();
+		assertEquals(drinkName, "coke");
+		assertEquals(drinkPrice, 120);
+	}
+	@Test
+	public void ジュースを格納する() throws VendingMachineExeption{
+		machine.store(new Drink("redbull", 200));
+		Drink redBull = machine.getDrink("redbull");
+		assertEquals(redBull.getName(), "redbull");
+		assertEquals(redBull.getPrice(), 200);
+	}
+	@Test
+	public void 指定したジュースの在庫量を返す() throws VendingMachineExeption{
+		assertEquals(machine.getStock("coke"), 5);
+		machine.store(new Drink("water",100));
+		assertEquals(machine.getStock("water"),1);
+		machine.getDrink("coke");
+		assertEquals(machine.getStock("coke"), 4);
+	}
+	
 }
