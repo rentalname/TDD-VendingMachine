@@ -1,9 +1,16 @@
 package vendingmachine.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Collection;
+
 import money.Money;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,20 +18,12 @@ import vendingmachine.VendingMachine;
 import vendingmachine.VendingMachineExeption;
 import vendingmachine.store.Drink;
 
-/**
- * 
- * @author Hi
- * 
- */
 public class VendingMachineTest {
 
 	private VendingMachine machine;
 
-	/**
-	 * @throws java.lang.Exception
-	 */
 	@Before
-	public void setUp() throws Exception {
+	public void setUp(){
 		machine = new VendingMachine();
 		Drink coke = new Drink("coke", 120);
 		machine.store(coke, 5);
@@ -35,7 +34,7 @@ public class VendingMachineTest {
 	}
 
 	@Test
-	public final void お金を投入する前での総計額を取得する() {
+	public void お金を投入する前での総計額を取得する() {
 		assertEquals(machine.getTotal(), 0);
 	}
 
@@ -173,5 +172,28 @@ public class VendingMachineTest {
 	public void 払い戻し操作によって投入総計額は0になる() throws VendingMachineExeption {
 		ジュース購入後の払い戻し();
 		assertEquals(machine.getTotal(), 0);
+	}
+
+	@Test
+	public void ドリンクのリストを取得する() {
+		machine.store(new Drink("Diet Coke", 130), 3);
+		Collection<Drink> drinkList = machine.getDrinkCollection();
+		assertEquals(drinkList.size(), 4);
+	}
+
+	@Test
+	public void 在庫の存在するドリンクのリストを取得する() throws VendingMachineExeption {
+		machine.store(new Drink("Soda Pop", 10));
+		machine.getDrink("Soda Pop");
+		Collection<Drink> hasStock = machine.hasStockDrinkCollection();
+		assertEquals(hasStock.size(), 3);
+	}
+
+	@Test
+	public void 購入可能なドリンクのリストを取得する() {
+		machine.insert(Money.Hundred);
+		machine.insert(Money.Fifty);
+		Collection<Drink> parchaseList = machine.canParchaseList();
+		assertEquals(parchaseList.size(), 2);
 	}
 }

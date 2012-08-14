@@ -1,7 +1,10 @@
 package vendingmachine;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,6 +45,22 @@ public class VendingMachine {
 		return drinkStock.get(name);
 	}
 
+	public Collection<Drink> getDrinkCollection() {
+		Collection<Drink> values = drinkType.values();
+		return values;
+	}
+
+	public Collection<Drink> hasStockDrinkCollection() {
+		ArrayList<Drink> list = new ArrayList<>(getDrinkCollection());
+		for (Iterator<Drink> i = list.iterator(); i.hasNext();) {
+			Drink drink = i.next();
+			if (drinkStock.get(drink.getName()) < 1) {
+				i.remove();
+			}
+		}
+		return list;
+	}
+
 	/**
 	 * 指定された名前を持つジュースの在庫が1以上であり, 投入金額が指定されたドリンクの価格以上であればtrueを返す
 	 * 
@@ -55,6 +74,17 @@ public class VendingMachine {
 			}
 		}
 		return false;
+	}
+
+	public Collection<Drink> canParchaseList() {
+		Collection<Drink> parchaseList = drinkType.values();
+		for (Iterator<Drink> i = parchaseList.iterator(); i.hasNext();) {
+			Drink drink = i.next();
+			if (!canParchase(drink.getName())) {
+				i.remove();
+			}
+		}
+		return parchaseList;
 	}
 
 	private int total;
@@ -105,6 +135,22 @@ public class VendingMachine {
 		return payBuckTotal;
 	}
 
+	int saleProceeds;
+
+	public Drink vending(String name) throws VendingMachineExeption {
+		if (canParchase(name)) {
+			Drink drink = getDrink(name);
+			total -= drink.getPrice();
+			saleProceeds += drink.getPrice();
+			return drink;
+		}
+		return null;
+	}
+
+	public int getSales() {
+		return saleProceeds;
+	}
+
 	private static Set<Money> getAcceptableMoneySet() {
 		Set<Money> set = new HashSet<Money>();
 		set.add(Money.Ten);
@@ -126,18 +172,4 @@ public class VendingMachine {
 		return set;
 	}
 
-	int saleProceeds;
-	public Drink vending(String name) throws VendingMachineExeption {
-		if(canParchase(name)){
-			Drink drink = getDrink(name);
-			total -= drink.getPrice();
-			saleProceeds += drink.getPrice();
-			return drink;
-		}
-		return null;
-	}
-	
-	public int getSales() {
-		return saleProceeds;
-	}
 }
