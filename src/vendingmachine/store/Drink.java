@@ -3,6 +3,7 @@ package vendingmachine.store;
 public class Drink {
 	private String name;
 	private int price;
+	private int change;
 
 	public Drink(String drinkName, int drinkPrice) {
 		name = drinkName;
@@ -17,4 +18,12 @@ public class Drink {
 		return price;
 	}
 
+	// ”Ì”„‚³‚ê‚½‚Æ‚«‚Ì,’Þ‚è‘K‚ðŽæ“¾‚·‚é
+	public int getChange() {
+		return change;
+	}
+
+	public void setChange(int change) {
+		this.change = change;
+	}
 }
